@@ -32,23 +32,25 @@ Proyek ini mengikuti alur kerja machine learning yang sistematis:
     -   Membagi dataset menjadi tiga set (train 80%, validation 10%, test 10%) menggunakan `split-folders`.
     -   Membangun pipeline data yang sangat efisien menggunakan `tf.keras.utils.image_dataset_from_directory` dan `tf.data` API, yang mencakup `.cache()` dan `.prefetch()` untuk performa maksimal.
 
-2.  **Pembuatan Model (Transfer Learning):**
-    -   Menggunakan arsitektur **Transfer Learning** dengan `EfficientNetB0` sebagai *base model* yang bobotnya dibekukan (`trainable=False`).
-    -   Menambahkan lapisan augmentasi data (`RandomFlip`, `RandomRotation`, `RandomZoom`) sebagai bagian dari model untuk membuat model lebih tangguh terhadap variasi gambar.
-    -   Menambahkan *classifier head* baru yang terdiri dari `GlobalAveragePooling2D`, `Dense`, dan `Dropout` di atas *base model*.
-    -   Menggunakan `sparse_categorical_crossentropy` sebagai fungsi loss yang sesuai dengan output label dari pipeline `tf.data`.
+2.  **Pembuatan Model (Arsitektur Sequential & Transfer Learning):**
+    -   Membangun model menggunakan **`tf.keras.Sequential`** untuk memenuhi kriteria utama submission.
+    -   Menggunakan **Transfer Learning** dengan `EfficientNetB0` (dengan bobot `imagenet` yang dibekukan) sebagai lapisan pertama untuk ekstraksi fitur yang kuat.
+    -   Menambahkan **lapisan augmentasi data** (`RandomFlip`, `RandomRotation`, `RandomZoom`) langsung di dalam model `Sequential` untuk meningkatkan robustisitas.
+    -   Menambahkan **lapisan kustom `Conv2D` dan `MaxPooling2D`** setelah `EfficientNetB0` sesuai dengan kriteria wajib.
+    -   Mendesain *classifier head* yang terdiri dari lapisan `Flatten`, `Dense`, dan `Dropout` untuk melakukan klasifikasi akhir.
 
 3.  **Pelatihan Model:**
     -   Melatih model pada lingkungan GPU untuk akselerasi.
-    -   Menggunakan Callbacks canggih seperti `ModelCheckpoint` untuk menyimpan model terbaik, `EarlyStopping` untuk mencegah overfitting dan menghemat waktu, serta `ReduceLROnPlateau` untuk menyesuaikan *learning rate* secara dinamis.
+    -   Menggunakan Callbacks canggih seperti `ModelCheckpoint` untuk menyimpan model terbaik, `EarlyStopping` untuk mencegah overfitting, serta `ReduceLROnPlateau` untuk menyesuaikan *learning rate* secara dinamis.
 
 4.  **Evaluasi:**
-    -   Mengevaluasi performa model pada data tes yang belum pernah dilihat untuk mendapatkan metrik akurasi yang sebenarnya.
-    * Membuat visualisasi berupa plot histori akurasi/loss dan *Confusion Matrix* untuk analisis performa yang mendalam.
+    -   Mengevaluasi performa model pada data tes untuk mendapatkan metrik akurasi yang sebenarnya.
+    -   Membuat visualisasi berupa plot histori akurasi/loss dan *Confusion Matrix* untuk analisis performa yang mendalam.
 
 5.  **Deployment:**
-    -   Membuat model inferensi terpisah (tanpa lapisan augmentasi) untuk memastikan kompatibilitas dan efisiensi.
-    -   Mengekspor model yang telah divalidasi ke dalam tiga format standar: **`SavedModel`**, **`TensorFlow Lite (.tflite)`**, dan **`TensorFlow.js`**.
+    -   Membuat **model inferensi terpisah** (tanpa lapisan augmentasi) dengan memuat bobot dari model terbaik yang telah dilatih. Ini dilakukan untuk memastikan kompatibilitas dan efisiensi saat konversi.
+    -   Mengekspor model inferensi ke dalam tiga format standar: **`SavedModel`**, **`TensorFlow Lite (.tflite)`**, dan **`TensorFlow.js`**.
+
 
 ---
 
@@ -59,10 +61,10 @@ Model berhasil mencapai performa yang sangat memuaskan dan memenuhi semua kriter
 -   **Akurasi Akhir pada Data Tes: 96.23%**
 
 ### Grafik Pelatihan Model
-![Training History](https://res.cloudinary.com/dvb1yjl8g/image/upload/v1750940147/graph_m0fxpg.png)
+![Training History](https://res.cloudinary.com/dvb1yjl8g/image/upload/v1751007452/graph_pe2zoq.png)
 
 ### Confusion Matrix
-![Confusion Matrix](https://res.cloudinary.com/dvb1yjl8g/image/upload/v1750940146/confusionpng_p65op6.png)
+![Confusion Matrix](https://res.cloudinary.com/dvb1yjl8g/image/upload/v1751007452/confusionpng_g4ynd7.png)
 
 ---
 
